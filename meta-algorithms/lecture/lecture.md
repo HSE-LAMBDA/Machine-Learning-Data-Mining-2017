@@ -359,7 +359,7 @@ Tree growing algorithm:
 - a tons of implementations and modifications:
   - classic: XGBoost;
   - oblivious trees: CatBoost (MatrixNet);
-- achieves state-of-the art results \dots sometimes, blah-blah-blah... No-Free-Lunch.
+- achieves state-of-the-art results \dots sometimes, blah-blah-blah... No-Free-Lunch.
 
 ### Discussion
 
@@ -374,6 +374,7 @@ Tree growing algorithm:
 - Freund, Y., Schapire, R. and Abe, N., 1999. A short introduction to boosting. Journal-Japanese Society For Artificial Intelligence, 14(771-780), p.1612.
 - Zhu, J., Zou, H., Rosset, S. and Hastie, T., 2009. Multi-class adaboost. Statistics and its Interface, 2(3), pp.349-360.
 - Friedman, J.H., 2001. Greedy function approximation: a gradient boosting machine. Annals of statistics, pp.1189-1232.
+- `https://xgboost.readthedocs.io/en/latest/model.html`
 
 ## Bonus
 
@@ -389,7 +390,7 @@ Tree growing algorithm:
 
 ### Almost bagging in Deep Learning
 
-![width=1](imgs/dropout.jpeg)
+![width=1](imgs/dropout.png)
 
 ### Boosting (?)
 
