@@ -1,11 +1,13 @@
-# Machine Learning and Data Mining
+# Optimization in ML
 
 ~~~
-\subtitle{Optimization in ML}
+\subtitle{Machine Learning and Data Mining}
 \author{Maxim Borisyak}
 
 \institute{National Research University Higher School of Economics (HSE)}
 \usepackage{amsmath}
+
+\DeclareMathOperator*{\E}{\mathbb{E}}
 
 \DeclareMathOperator*{\argmin}{\mathrm{arg\,min}}
 \DeclareMathOperator*{\argmax}{\mathrm{arg\,max}}
@@ -251,10 +253,102 @@ Given known samples $\mathcal{O}^t = \left\{(\theta_i, L_i) \right\}^t_{i = 1}$:
 
 ### Bayesian optimization
 
-The most well-known surrogate optimization method.
+The most well-known black-box optimization method.
 `\\[5mm]`
 
 Surrogate model:
-- also estimates variance of predictions (or the entire posterior distribution);
+- must estimate: $P(y \mid D, x)$;
 - usually Gaussian processes:
-  - 
+  - easy to handle (normal distribution everywhere);
+  - computationally expensive $O(n^3)$, $n$ - number of points.
+- possible to use Random Forest or Boosting;
+- the most promising point is defined by aquisition function:
+  $$a(x) \to \max$$
+
+### Aquisition functions
+`\vspace*{3mm}`
+- $f'$ - current minimum; $D$ - observed values.
+
+Probability of improvement:
+$$a_{pi}(x) = \E\left[ \mathbb{I}[f(x) > f'] \mid D \right] \underbrace{= \Phi(f', \mu(x), K(x, x))}_{GP}$$
+
+Expected improvement:
+
+~~~multline*
+a_{ei}(x) = \E\left[ \max(0, f' - f(x)) \mid D \right] = \\ \underbrace{(f' - \mu(x))\Phi(f', \mu(x), K(x, x)) + K(x, x)\phi(f', \mu(x), K(x, x))}_{GP}
+~~~
+
+Lower confidence bound:
+$$a_{lcb}(x) = \mu(x) + \beta \sigma(x)$$
+
+### Variational optimization
+
+$$\min_x f(x) \leq \E_{x \sim \pi_\psi} f(x) = J(\psi) $$
+- $\pi_\psi$ - search distribution;
+
+~~~multline*
+\nabla J(\psi) = \nabla \E_{x \sim \pi_\psi} f(x) = \\
+  \int_x f(x) \left( \nabla \pi(x \mid \psi) \right) \frac{\pi(x \mid \psi) }{\pi(x \mid \psi) } dx = \\
+    \int_x f(x) \nabla \log \pi(x \mid \psi) \pi(x \mid \psi) dx = \\
+      \E_{x \sim \pi_\psi} f(x) \nabla \log \pi(x \mid \psi) \approx \\
+      \frac{1}{n}\sum^n_{i = 1} f(x_i) \nabla \log \pi(x_i \mid \psi)
+~~~
+
+### Evolution Strategies
+
+Evolution Strategies - is a subset of variational optimization (?).
+
+- Repeat:
+  - sample $\{x_i\}^n_{i = 1}$ from $\pi(\cdot \mid \psi)$;
+  - evaluate $f_i = f(x_i)$;
+  - compute:
+    $$\nabla J(\psi) \approx \frac{1}{n}\sum^n_{i = 1} f_i \nabla \log \pi(x_i \mid \psi)$$
+  - update $\psi$, e.g.
+    $$\psi \leftarrow \mathrm{adamax}(\nabla J(\psi))$$
+
+### Evolution Strategies
+
+- $d$ - dimensionality of the problem;
+- $\pi_\psi$ - Gaussian:
+  - $\mathrm{dim}(\psi) = O(d^2)$: covariance matrix and mean vector;
+  - $O(d^3)$ operations per step;
+- $\pi_\psi$ - Gaussian with independent components:
+  - $|\psi| = O(d)$: diagonal covariance matrix and mean vector;
+  - $O(d)$ operations per step;
+- $\pi_\psi$ - scaled normal:
+  - $|\psi| = O(d)$: variance $\sigma$ and mean vector;
+  - $O(d)$ operations per step;
+  - less samples for estimating gradient.
+
+## Summary
+
+### Summary
+
+Known your optimization algorithms:
+- differentiable $\Rightarrow$ gradient methods;
+- super heavy objective $\Rightarrow$ Bayesian;
+- non-differentiable $\Rightarrow$ Variational Optimization;
+- wierd model $\Rightarrow$ evolutionary optimization.
+
+`\vspace*{5mm}`
+
+~~~center
+\textbf{ Don't blindly follow this.}
+~~~
+
+### References, gradient-methods
+
+- Bottou, L., 2012. Stochastic gradient descent tricks. In Neural networks: Tricks of the trade (pp. 421-436). Springer Berlin Heidelberg.
+- Kingma, D. and Ba, J., 2014. Adam: A method for stochastic optimization. arXiv preprint arXiv:1412.6980.
+- Zeiler, M.D., 2012. ADADELTA: an adaptive learning rate method. arXiv preprint arXiv:1212.5701.
+
+### References, quasi-Newton
+
+- Fletcher, R., 2013. Practical methods of optimization. John Wiley  Sons.
+
+### References, gradient-free
+
+- Back, T., 1996. Evolutionary algorithms in theory and practice: evolution strategies, evolutionary programming, genetic algorithms. Oxford university press.
+- Kennedy, J., 2011. Particle swarm optimization. In Encyclopedia of machine learning (pp. 760-766). Springer US.
+- Wierstra, D., Schaul, T., Glasmachers, T., Sun, Y., Peters, J. and Schmidhuber, J., 2014. Natural evolution strategies. Journal of Machine Learning Research, 15(1), pp.949-980.
+- Snoek, J., Larochelle, H. and Adams, R.P., 2012. Practical bayesian optimization of machine learning algorithms. In Advances in neural information processing systems (pp. 2951-2959).
