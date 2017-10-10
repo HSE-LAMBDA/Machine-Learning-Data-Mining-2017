@@ -1,7 +1,7 @@
-#  Machine Learning and Data Mining
+# No Free Lunch
 
 ~~~
-\subtitle{No Free Lunch theorem}
+\subtitle{Machine Learning and Data Mining}
 \author{Maxim Borisyak}
 
 \institute{National Research University Higher School of Economics (HSE)}

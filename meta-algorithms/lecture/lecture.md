@@ -1,7 +1,7 @@
-#  Machine Learning and Data Mining
+# Meta-algorithms
 
 ~~~
-\subtitle{Meta-algorithms}
+\subtitle{Machine Learning and Data Mining}
 \author{Maxim Borisyak}
 
 \institute{National Research University Higher School of Economics (HSE)}

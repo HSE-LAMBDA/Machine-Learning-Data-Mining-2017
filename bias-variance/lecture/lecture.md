@@ -1,7 +1,7 @@
-#  Machine Learning and Data Mining
+# Bias-Variance decomposition and regularisation
 
 ~~~
-\subtitle{Bias-Variance decomposition and regularisation}
+\subtitle{Machine Learning and Data Mining}
 \author{Maxim Borisyak}
 
 \institute{National Research University Higher School of Economics (HSE)}

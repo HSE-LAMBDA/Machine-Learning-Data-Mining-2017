@@ -1,7 +1,7 @@
-# Machine Learning and Data Mining
+# Optimization in ML
 
 ~~~
-\subtitle{Optimization in ML}
+\subtitle{Machine Learning and Data Mining}
 \author{Maxim Borisyak}
 
 \institute{National Research University Higher School of Economics (HSE)}
