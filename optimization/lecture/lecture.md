@@ -69,6 +69,16 @@ $$\theta^{t + 1} = O\left[ \theta^t, \mathcal{L} \right].$$
 - optimization method $O$:
   - heavily-dependent on nature of $\mathcal{L}$.
 
+### Optimization in ML
+
+Optimization methods:
+- heavily restrict:
+  - speed of the algorithm:
+  - quality of solutions;
+- some optimization methods allows for new models:
+  - discreet or mixed parameters;
+  - variable size models.
+
 ## Gradient methods
 
 ### The zoo
@@ -93,7 +103,7 @@ Do you have a nearly-quadratic target function?
 `\vspace*{5mm}`
   - __yes__: is the problem low-dimensional?
     `\vspace*{3mm}`
-    - __yes__: go Netwon!
+    - __yes__: go Newton!
     `\vspace*{3mm}`
     - __no__: use gradient or quasi-Newton methods;
   `\vspace*{5mm}`
@@ -193,7 +203,9 @@ Basic operations:
 `\vspace*{5mm}`
 
 Application:
-- you have no idea how to optimize objective.
+- you have no idea how to optimize objective function;
+- evolution algorithms basically can handle any parametrization:
+  - e.g. DNA molecules.
 
 ### Memetic algorithms
 
@@ -224,4 +236,25 @@ multistart = lambda locally_optimize:  memetic(
 - non-differentiable:
   - complex computer simulations (e.g. aero-dynamics);
 - so multi-modal, gradient does not have sense:
-  - extremely deep networks (e.g. reccurent networks);
+  - extremely deep networks (e.g. recurrent networks);
+
+### Surrogate optimization
+A type of black-box optimization.
+`\\[5mm]`
+
+Given known samples $\mathcal{O}^t = \left\{(\theta_i, L_i) \right\}^t_{i = 1}$:
+- fit regression (surrogate) model to $\left\{(\theta_i, L_i) \right\}^t_{i = 1}$;
+- find the most promising $\theta_{t + 1}$ with conventional optimization methods;
+- evaluate objective in $\theta_{t + 1}$;
+- $\mathcal{O}^{t + 1} = \mathcal{O}^t \cup \left\{(\theta_{t + 1}, L_{t + 1}) \right\}$;
+- repeat.
+
+### Bayesian optimization
+
+The most well-known surrogate optimization method.
+`\\[5mm]`
+
+Surrogate model:
+- also estimates variance of predictions (or the entire posterior distribution);
+- usually Gaussian processes:
+  - 
