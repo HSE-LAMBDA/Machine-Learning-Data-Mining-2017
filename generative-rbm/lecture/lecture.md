@@ -1,4 +1,4 @@
-# Macro NN architecture
+# Restricted Boltzmann Machine
 
 ~~~
 \subtitle{Machine Learning and Data Mining}
@@ -237,3 +237,236 @@ Consider energy function in form of **product of experts**:
 E(x, h) &=& -\beta(x) + \sum_i \gamma(x, h_i);\\
 \mathrm{FreeEnergy}(x) &=& -\beta(x) - \sum_i \log \sum_{h_i} \exp(-\gamma(x, h_i)).
 ~~~
+
+### Product of experts
+
+Pros:
+- efficient computing procedure for $\mathrm{FreeEnergy}(x)$;
+- each component of $h$ can be sampled independently.
+
+Cons:
+- a special case.
+
+### Restricted Boltzmann machine
+
+Restricted Boltzmann machine forbids interactions:
+- within visible variables;
+- within hidden variables.
+
+`\vspace{5mm}`
+
+$$E(x, h) = \sum_j \phi_j(x_j) + \sum_i \xi(h_i) + \sum_{i, j}\eta_{ij}(x_j, h_i)$$
+
+which can be rewritten simply as:
+
+$$E(x, h) = \sum_{i, j}\eta_{ij}(x_j, h_i)$$
+
+### RBM as NN
+
+![width=1](imgs/bm.png)
+
+***
+
+![width=1](imgs/rbm.png)
+
+### Gibbs sampling for RBM
+
+`\vspace*{5mm}`
+
+- each component of $h$ given $x$ (and vice versa) can be sampled independently;
+- whole vector of hidden or visible units can be sampled simultaneously;
+- e.g. for binomial hidden variables:
+
+~~~multline*
+P(h^{k} = 1 \mid X = x) = \\
+  \frac{\exp\left[ -\sum_j \eta_{kj}(x_j, 1) \right]}{\exp\left[-\sum_j \eta_{kj}(x_j, 0) \right] + \exp\left[-\sum_j \eta_{kj}(x_j, 1) \right]}
+~~~
+
+~~~multline*
+P(x^{l} = 1 \mid H = h) = \\
+  \frac{\exp\left[ -\sum_i \eta_{il}(1, h_i) \right]}{\exp\left[ -\sum_i \eta_{il}(0, h_i) \right] + \exp\left[ -\sum_i \eta_{il}(1, h_i) \right]}
+~~~
+
+### Gibbs sampling for RBM
+
+Gibbs sampling for RBM is especially simple:
+
+~~~eqnarray*
+h^0 &\sim& P(H \mid X = x^0);\\
+x^1 &\sim& P(X \mid H = h^1);\\
+h^1 &\sim& P(H \mid X = x^1);\\
+x^2 &\sim& P(X \mid H = h^2);\\
+\dots\\
+h^{k - 1} &\sim& P(H \mid X = x^{k - 1});\\
+x^k &\sim& P(X \mid H = h^{k - 1});\\
+h^k &\sim& P(H \mid X = x^k);
+~~~
+
+### CD-k update
+
+Free energy version:
+- sample $x^0$ from real data;
+- compute $\frac{\partial}{\partial \theta} \mathrm{FreeEnergy}(x^0)$;
+- initialize Gibbs chain with $x^0$, perform $k$ steps of Gibbs sampling to obtain $x^k$;
+- compute $\frac{\partial}{\partial \theta} \mathrm{FreeEnergy}(x^k)$;
+- update step:
+  $$\theta := \theta + \alpha\left[ -\frac{\partial}{\partial \theta} \mathrm{FreeEnergy}(x^0) + \frac{\partial}{\partial \theta} \mathrm{FreeEnergy}(x^k) \right]$$
+
+### CD-k update
+
+Energy version:
+- sample $x^0$ from real data;
+- initialize Gibbs chain with $x^0$, sample $h^0$;
+- compute $\frac{\partial}{\partial \theta} \mathrm{Energy}(x^0, h^0)$;
+- perform further $k$ steps of Gibbs sampling to obtain $h^k, x^k$;
+- compute $\frac{\partial}{\partial \theta} \mathrm{Energy}(x^k, h^k)$;
+- update step:
+  $$\theta := \theta + \alpha\left[ -\frac{\partial}{\partial \theta} \mathrm{Energy}(x^0, h^0) + \frac{\partial}{\partial \theta} \mathrm{Energy}(x^k, h^k) \right]$$
+
+### Justification of CD-k update
+
+For Gibbs chain
+$$x^0 \rightarrow h^0 \rightarrow x^1 \rightarrow h^1 \rightarrow \dots$$
+
+~~~multline*
+\frac{\partial}{\partial \theta} \log P(x^0) = \\
+  -\frac{\partial}{\partial \theta} \mathrm{FreeEnergy}(x^0) +
+    \mathbb{E}\left[ \frac{\partial}{\partial \theta} \mathrm{FreeEnergy}(x^t) \right] + \\
+      \mathbb{E}\left[ \frac{\partial}{\partial \theta} \log P(x^t) \right];
+~~~
+
+~~~equation*
+  \mathbb{E}\left[ \frac{\partial}{\partial \theta} P(x^t) \right] \to 0, \text{as\;} t \to \infty
+~~~
+
+### CD-$1/2$
+
+Consider truncated Gibbs chain $x^0 \rightarrow h^0$:
+
+~~~multline*
+\frac{\partial}{\partial \theta} \log P\left(x^0\right) =
+    \mathbb{E}\left[ \frac{\partial}{\partial \theta} P\left(x^0 \mid h^1\right) \right] +
+      \mathbb{E}\left[ \frac{\partial}{\partial \theta} \log P\left(h^1\right) \right];
+~~~
+
+Using mean-field approximation:
+
+~~~equation*
+  \mathbb{E}\left[ \frac{\partial}{\partial \theta} P\left(x^0 \mid h^1\right) \right] \approx \frac{\partial}{\partial \theta} P\left(x^0 \mid \mathbb{E} h^1\right)
+~~~
+
+and ignoring the second term we end up optimizing **reconstruction error**:
+
+~~~equation*
+  \mathcal{L} = -\log P\left(x^0 \mid \mathbb{E} h^0\right)
+~~~
+
+### Bernulli-Bernulli RBM
+
+~~~eqnarray*
+E(x, h) &=& -b^T x - c^T h - h^T W x;\\
+P(h \mid x) &=& \sigma\left( c + W x \right);\\
+P(x \mid h) &=& \sigma\left( b + W^T h \right);
+~~~
+
+### Types of units
+
+`\vspace{5mm}`
+
+- binomial unit $u$ with total input x:
+  $$P(u = 1 \mid x) = \sigma(x);$$
+
+- multinomial (softmax) unit:
+  $$P(u = k \mid x) = \frac{\exp(x_k)}{\sum_i \exp(x_i)};$$
+
+- rectified linear unit: infinite series of binomial units with shared connection and different biases:
+
+~~~eqnarray*
+u(x) &\sim& \sum_i \mathrm{binomial}\left(x -\frac{1}{2} + i \right);\\
+u(x) &\sim& \max\left[0, x + \mathcal{N}(0, \sigma(x))\right];\\
+P(u = k \mid x) &\approx& \log \left(1 + e^x\right).
+~~~
+
+### Types of units
+
+- Gaussian visible units:
+  $$E(x, h) = \sum_i \frac{(x_i - b_i)^2}{2 \sigma_i^2} - \sum_j c_j h_j - \sum_{ij} h_j W_{ij} \frac{x_i}{\sigma_i} $$
+- Gaussian-Gaussian RBM:
+  $$E(x, h) = \sum_i \frac{(x_i - b_i)^2}{2 \sigma_i^2} - \sum_j \frac{(h_j - c_j)^2}{2 \sigma_j} - \sum_{ij} \frac{h_j}{\sigma_j} W_{ij} \frac{x_i}{\sigma_i} $$
+
+- $\sigma$ can be learned, but it makes optimization hard;
+- usually each input feature is scaled to have zero mean and unit variance, $\sigma$ is fixed to 1.
+
+### Weight decay
+
+Introducing $l_2$ regularization on $W$ leads to *weight decay*:
+- faster mixing (convergence) of MCMC chain;
+- thus, faster training.
+
+Introducing $l_1$ on *activation* of hidden units leads to sparse RBM:
+- presumably, easier interpretation;
+- e.g. for visual data learns localized features.
+
+## RBM for discrimination
+
+### As a feature extractor
+
+- train RBM on $X$ to obtain hidden units $h_i$;
+- train a discriminative model on $h_i \rightarrow \hat{y}_i$.
+
+Possible applications:
+- reducing dimensionality (somewhat equivalent to e.g. AE):
+  - high-dimensional inputs;
+  - small number of training samples;
+- ...
+
+Cons:
+- there are a number of more fancier and simpler techniques.
+
+### Discriminative RBM
+
+- train RBM to recover joint distribution $P(x, y)$;
+
+$$f(x) = \frac{\exp\left[ -\mathrm{FreeEnergy}( k, x) \right]}{\sum_i \exp\left[ -\mathrm{FreeEnergy}(i, x) \right]}$$
+
+- visible units can be divided into two groups:
+  - it is possible to use different types of units for each group;
+  - softmax unit, probably, the best choice for class unit.
+
+***
+
+![width=1](imgs/drbm.png)
+
+## Deep Belief Networks
+
+### Deep Belief Networks
+
+![width=1](imgs/dbn.png)
+
+### Deep Belief Networks
+
+- Greedy training:
+  - usually, trained in a greedy manner: each pair of layers is trained as an RBM.
+  - then, fine-tuned with back-propagation w.r.t to a supervised criteria.
+- Sleep-Wake algorithm;
+- transform DBN into Deep Boltzmann machine.
+
+## Summary
+
+### Summary
+
+Restricted Boltzmann Machine:
+- is an undirected two-layer energy-based generative model;
+- can be trained by Contrastive Divergence;
+- is a building block of Deep Belief Network.
+
+### References I
+
+- Bengio Y. Learning deep architectures for AI. Foundations and trends® in Machine Learning. 2009 Nov 15;2(1):1-27.
+- Hinton GE, Osindero S, Teh YW. A fast learning algorithm for deep belief nets. Neural computation. 2006 Jul;18(7):1527-54.
+- Nair V, Hinton GE. Rectified linear units improve restricted boltzmann machines. InProceedings of the 27th international conference on machine learning (ICML-10) 2010 (pp. 807-814).
+
+### References II
+
+- Hinton G. A practical guide to training restricted Boltzmann machines. Momentum. 2010 Aug 2;9(1):926.
+- Tieleman T. Training restricted Boltzmann machines using approximations to the likelihood gradient. InProceedings of the 25th international conference on Machine learning 2008 Jul 5 (pp. 1064-1071). ACM.
